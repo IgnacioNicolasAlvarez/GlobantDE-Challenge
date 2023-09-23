@@ -19,7 +19,7 @@ async def upload(
     file: UploadFile,
     column_names: List[str] = [],
     sep: str = ",",
-    delimiter: str = None,
+    has_header: bool = False,
 ):
     if not file.filename.endswith(".csv"):
         raise HTTPException(
@@ -34,10 +34,14 @@ async def upload(
             StringIO(data),
             names=column_names,
             sep=sep,
-            delimiter=delimiter,
+            header=int(has_header),
         )
 
-        chunks = [df[i : i + int(CHUNK_SIZE)] for i in range(0, len(df), int(CHUNK_SIZE))]
+        chunks = [
+            df[i : i + int(CHUNK_SIZE)] for i in range(0, len(df), int(CHUNK_SIZE))
+        ]
+        for chunk in chunks:
+            logger.info(chunk)
 
     except Exception as e:
         logger.error(e)
