@@ -49,7 +49,6 @@ async def upload(
 
         for chunk in chunks:
             for _, row in chunk.iterrows():
-                logger.info(row.to_dict())
                 department = Deparment(**row.to_dict())
                 session.add(department)
                 await session.commit()
