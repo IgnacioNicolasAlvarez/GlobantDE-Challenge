@@ -1,6 +1,8 @@
 from fastapi import Depends, FastAPI, Request
 from fastapi.security import OAuth2PasswordBearer
 
+# from src.api.database.db import init_db
+from src.api.database.model import Deparment, HiredEmployee, Job
 from src.logger import logger
 
 from .router.auth import router as auth_router
@@ -9,6 +11,11 @@ from .router.uploadfile import router as uploadfile_router
 app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+
+
+# @app.on_event("startup")
+# async def on_startup():
+#     await init_db()
 
 
 @app.middleware("http")
