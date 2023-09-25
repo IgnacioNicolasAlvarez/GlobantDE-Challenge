@@ -4,11 +4,10 @@ from typing import List
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
-from src.api.database.db import AsyncSession, get_session
-from src.api.database.model import Deparment
+from src.api.database.db import get_session
+from src.api.database.operation import delete_all, insert
 from src.api.router.model import enum
 from src.logger import logger
-from src.settings import CHUNK_SIZE
 
 router = APIRouter(
     prefix="/uploadfile",
@@ -20,17 +19,19 @@ router = APIRouter(
 @router.post("/upload/")
 async def upload(
     file: UploadFile,
-    column_names: List[str] = [],
+    column_names: List[str],
     sep: str = ",",
-    has_header: bool = False,
     is_full_load: bool = True,
     table_type: enum.TableType = enum.TableType.Department,
-    session: AsyncSession = Depends(get_session),
+    session=Depends(get_session),
 ):
     if not file.filename.endswith(".csv"):
         raise HTTPException(
             status_code=406, detail="The only allowed file extension is .csv"
         )
+
+    if table_type not in enum.TableType:
+        raise HTTPException(status_code=400, detail=f"Invalid table_type: {table_type}")
 
     try:
         contents = await file.read()
@@ -40,19 +41,11 @@ async def upload(
             StringIO(data),
             names=column_names[0].split(","),
             sep=sep,
-            header=int(has_header),
+            header=None,
         )
-
-        chunks = [
-            df[i : i + int(CHUNK_SIZE)] for i in range(0, len(df), int(CHUNK_SIZE))
-        ]
-
-        for chunk in chunks:
-            for _, row in chunk.iterrows():
-                department = Deparment(**row.to_dict())
-                session.add(department)
-                await session.commit()
-                await session.refresh(department)
+        if is_full_load:
+            delete_all(table_type=table_type, session=session)
+        insert(df=df, table_type=table_type, session=session)
 
     except Exception as e:
         logger.error(e)
