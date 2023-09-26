@@ -1,10 +1,10 @@
 from fastapi import Depends, FastAPI, Request
 from fastapi.security import OAuth2PasswordBearer
 
-from src.api.database.model import Deparment, HiredEmployee, Job
 from src.logger import logger
 
 from .router.auth import router as auth_router
+from .router.backup import router as backup_router
 from .router.uploadfile import router as uploadfile_router
 
 app = FastAPI()
@@ -29,3 +29,4 @@ async def log_requests(request: Request, call_next):
 
 app.include_router(auth_router)
 app.include_router(uploadfile_router, dependencies=[Depends(oauth2_scheme)])
+app.include_router(backup_router, dependencies=[Depends(oauth2_scheme)])
