@@ -23,7 +23,7 @@ async def create_backup(
         raise HTTPException(status_code=400, detail=f"Invalid table_type: {table_type}")
 
     try:
-        AvroBuckupClient.create_backup(
+        result = AvroBuckupClient.create_backup(
             table_type=table_type,
             session=session,
             avro_file_path=f"{BACKUP_BASE_PATH}/",
@@ -34,7 +34,7 @@ async def create_backup(
         logger.error(e)
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {}
+    return {"content_length": result["content_length"]}
 
 
 @router.post("/restore/")
@@ -47,7 +47,7 @@ async def restore_backup(
         raise HTTPException(status_code=400, detail=f"Invalid table_type: {table_type}")
 
     try:
-        AvroBuckupClient.restore_backup(
+        result = AvroBuckupClient.restore_backup(
             avro_file_path=f"{BACKUP_BASE_PATH}/",
             table_type=table_type,
             session=session,
@@ -58,4 +58,4 @@ async def restore_backup(
         logger.error(e)
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {}
+    return {"content_length": result["content_length"]}

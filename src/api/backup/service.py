@@ -22,6 +22,7 @@ class AvroBuckupClient:
     @staticmethod
     def create_backup(table_type, avro_file_path, avro_schema, session):
         try:
+            q_rows = 0
             table_class = TABLE_TYPE_MAPPING.get(table_type)
             statement = select(table_class)
             results = session.exec(statement)
@@ -37,20 +38,32 @@ class AvroBuckupClient:
                 str(current_date.day).zfill(2),
             )
             os.makedirs(folder_path, exist_ok=True)
+            
+            if os.path.exists(folder_path):
+                for file_name in os.listdir(folder_path):
+                    file_path = os.path.join(folder_path, file_name)
+                    os.remove(file_path)
+                    
             file_path = folder_path + "/" + str(uuid4()) + ".avro"
             with open(file_path, "wb") as avro_file:
                 all_records = [r.dict() for r in results.all()]
                 fastavro.writer(avro_file, schema, all_records)
 
+            q_rows = len(all_records)
+            
             logger.info(
                 f"Backup of table '{table_type}' created successfully at '{folder_path}'"
             )
+            
         except Exception as e:
             logger.error(f"Error creating backup: {str(e)}")
+            
+        return {"content_length": q_rows}
 
     @staticmethod
     def restore_backup(table_type, avro_file_path, date, session):
         try:
+            q_rows = 0
             table_class = TABLE_TYPE_MAPPING.get(table_type)
 
             folder_path = os.path.join(
@@ -68,6 +81,8 @@ class AvroBuckupClient:
 
             delete_all(table_type, session)
 
+            q_rows = len(records)
+            
             for record in records:
                 table_instance = table_class(**record)
                 session.add(table_instance)
@@ -77,5 +92,8 @@ class AvroBuckupClient:
             logger.info(
                 f"Backup of table '{table_type}' restored successfully from '{file_path}'"
             )
+            
         except Exception as e:
             logger.error(f"Error restoring backup: {str(e)}")
+        
+        return {"content_length": q_rows}
