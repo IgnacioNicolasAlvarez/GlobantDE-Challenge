@@ -15,6 +15,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+null_values = ["nan", "null", "none"]
 
 @router.post("/upload/")
 async def upload(
@@ -43,6 +44,9 @@ async def upload(
             sep=sep,
             header=None,
         )
+        
+        df.replace(null_values, None, inplace=True)
+        
         if is_full_load:
             delete_all(table_type=table_type, session=session)
         insert(df=df, table_type=table_type, session=session)
