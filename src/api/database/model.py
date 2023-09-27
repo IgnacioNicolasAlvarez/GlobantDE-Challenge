@@ -1,6 +1,10 @@
-from sqlmodel import Field, SQLModel
-from pydantic import validator
 from datetime import datetime
+
+from pydantic import validator
+from sqlmodel import Field, SQLModel
+
+from src.logger import logger
+from src.settings import DATE_FORMAT
 
 
 class HiredEmployeeBase(SQLModel):
@@ -9,13 +13,15 @@ class HiredEmployeeBase(SQLModel):
     datetime: str
     deparment_id: int
     job_id: int
-    
+
     @validator("datetime")
     def validate_datetime(cls, value):
         try:
-            datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ") 
+            datetime.strptime(value, DATE_FORMAT)
         except ValueError:
-            raise ValueError("El campo 'datetime' debe ser una fecha válida en el formato especificado")
+            logger.info(
+                f"The datetime field must be a valid date in the specified format"
+            )
         return value
 
 
