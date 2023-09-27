@@ -10,6 +10,7 @@ class QueryTemplate(str, Enum):
     count_job_deparment = "count_by_job_deparment.sql"
     count_job_more_mean = "count_job_more_than_mean.sql"
 
+
 def execute_template_query(session, template_dir, template_name, context: dict):
     env = Environment(loader=FileSystemLoader(template_dir))
 
