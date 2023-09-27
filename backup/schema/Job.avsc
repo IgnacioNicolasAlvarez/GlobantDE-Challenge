@@ -1,0 +1,19 @@
+{
+    "namespace": "job.avro",
+    "type": "record",
+    "name": "Job",
+    "fields": [
+        {
+            "name": "id",
+            "type": "int"
+        },
+        {
+            "name": "pk",
+            "type": "int"
+        },
+        {
+            "name": "job",
+            "type": "string"
+        }
+    ]
+}
