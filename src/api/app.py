@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from src.api.database.db import init_db
 from src.logger import logger
 
+from .router.analytics import router as analytics_router
 from .router.auth import router as auth_router
 from .router.backup import router as backup_router
 from .router.uploadfile import router as uploadfile_router
@@ -54,3 +55,4 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(uploadfile_router, dependencies=[Depends(oauth2_scheme)])
 app.include_router(backup_router, dependencies=[Depends(oauth2_scheme)])
+app.include_router(analytics_router, dependencies=[Depends(oauth2_scheme)])

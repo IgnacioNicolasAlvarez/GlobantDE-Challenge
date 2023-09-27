@@ -15,6 +15,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+
 @router.post("/upload/")
 async def upload(
     file: UploadFile,
