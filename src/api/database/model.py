@@ -10,7 +10,7 @@ class HiredEmployeeBase(SQLModel):
 
 
 class HiredEmployee(HiredEmployeeBase, table=True):
-    pk: int = Field(default=None, nullable=False, primary_key=True)
+    pk: int = Field(default=None, nullable=False, primary_key=True) 
 
 
 class HiredEmployeeCreate(HiredEmployeeBase):

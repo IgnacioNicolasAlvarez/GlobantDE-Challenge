@@ -8,6 +8,10 @@
             "type": "int"
         },
         {
+            "name": "pk",
+            "type": "int"
+        },
+        {
             "name": "deparment",
             "type": "string"
         }

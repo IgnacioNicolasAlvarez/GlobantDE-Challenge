@@ -7,6 +7,7 @@ from fastavro.schema import load_schema
 from sqlmodel import select
 
 from src.api.database.model import Deparment, HiredEmployee, Job
+from src.api.database.operation import delete_all
 from src.api.router.model import enum
 from src.logger import logger
 
@@ -18,7 +19,8 @@ TABLE_TYPE_MAPPING = {
 
 
 class AvroBuckupClient:
-    def create_backup(self, table_type, avro_file_path, avro_schema, session):
+    @staticmethod
+    def create_backup(table_type, avro_file_path, avro_schema, session):
         try:
             table_class = TABLE_TYPE_MAPPING.get(table_type)
             statement = select(table_class)
@@ -45,3 +47,35 @@ class AvroBuckupClient:
             )
         except Exception as e:
             logger.error(f"Error creating backup: {str(e)}")
+
+    @staticmethod
+    def restore_backup(table_type, avro_file_path, date, session):
+        try:
+            table_class = TABLE_TYPE_MAPPING.get(table_type)
+
+            folder_path = os.path.join(
+                avro_file_path,
+                table_type,
+                str(date.year),
+                str(date.month).zfill(2),
+                str(date.day).zfill(2),
+            )
+            file_name = os.listdir(folder_path)[0]
+            file_path = os.path.join(folder_path, file_name)
+
+            with open(file_path, "rb") as avro_file:
+                records = list(fastavro.reader(avro_file))
+
+            delete_all(table_type, session)
+
+            for record in records:
+                table_instance = table_class(**record)
+                session.add(table_instance)
+                session.commit()
+                session.refresh(table_instance)
+
+            logger.info(
+                f"Backup of table '{table_type}' restored successfully from '{file_path}'"
+            )
+        except Exception as e:
+            logger.error(f"Error restoring backup: {str(e)}")

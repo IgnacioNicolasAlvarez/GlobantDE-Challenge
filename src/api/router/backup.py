@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.backup.service import AvroBuckupClient
@@ -14,19 +16,42 @@ router = APIRouter(
 
 
 @router.post("/write/")
-async def create_db(
+async def create_backup(
     table_type: enum.TableType = enum.TableType.Department, session=Depends(get_session)
 ):
     if table_type not in enum.TableType:
         raise HTTPException(status_code=400, detail=f"Invalid table_type: {table_type}")
 
     try:
-        avro_client = AvroBuckupClient()
-        avro_client.create_backup(
+        AvroBuckupClient.create_backup(
             table_type=table_type,
             session=session,
             avro_file_path=f"{BACKUP_BASE_PATH}/",
             avro_schema=f"{BACKUP_BASE_PATH}/schema/{table_type.value}.avsc",
+        )
+
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {}
+
+
+@router.post("/restore/")
+async def restore_backup(
+    table_type: enum.TableType = enum.TableType.Department,
+    session=Depends(get_session),
+    date: date = date.today(),
+):
+    if table_type not in enum.TableType:
+        raise HTTPException(status_code=400, detail=f"Invalid table_type: {table_type}")
+
+    try:
+        AvroBuckupClient.restore_backup(
+            avro_file_path=f"{BACKUP_BASE_PATH}/",
+            table_type=table_type,
+            session=session,
+            date=date,
         )
 
     except Exception as e:
