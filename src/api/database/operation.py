@@ -1,14 +1,8 @@
 from sqlalchemy import delete
 
-from src.api.database.model import Deparment, HiredEmployee, Job
-from src.api.router.model import enum
+from src.api.utils.mapping import TABLE_TYPE_MAPPING
+from src.logger import logger
 from src.settings import CHUNK_SIZE
-
-TABLE_TYPE_MAPPING = {
-    enum.TableType.Department: Deparment,
-    enum.TableType.Job: Job,
-    enum.TableType.HiredEmployee: HiredEmployee,
-}
 
 
 def delete_all(table_type, session) -> int:
@@ -27,7 +21,11 @@ def insert(df, table_type, session):
     if table_class:
         for chunk in chunks:
             for _, row in chunk.iterrows():
-                table_instance = table_class(**row.to_dict())
-                session.add(table_instance)
-                session.commit()
-                session.refresh(table_instance)
+                try:
+                    table_instance = table_class(**row.to_dict())
+                    session.add(table_instance)
+                    session.commit()
+                    session.refresh(table_instance)
+                except Exception as e:
+                    session.rollback()
+                    logger.error(e)

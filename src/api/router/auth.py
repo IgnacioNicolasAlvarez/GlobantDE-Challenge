@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 from src.api.auth.model import Token
-from src.api.auth.utils import create_access_token, get_password_hash, verify_password
+from src.api.auth.utils import (create_access_token, get_password_hash,
+                                verify_password)
 from src.logger import logger
 from src.settings import ACCESS_TOKEN_EXPIRE_MINUTES
 

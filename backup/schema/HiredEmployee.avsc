@@ -1,5 +1,5 @@
 {
-    "namespace": "hired_employee.avro",
+    "namespace": "hiredemployee.avro",
     "type": "record",
     "name": "HiredEmployee",
     "fields": [
@@ -16,17 +16,16 @@
             "type": "string"
         },
         {
-            "name": "department_id",
+            "name": "deparment_id",
             "type": "int"
         },
         {
             "name": "job_id",
             "type": "int"
-        }
-        ,        
+        },
         {
             "name": "pk",
             "type": "int"
-        },
+        }
     ]
 }
