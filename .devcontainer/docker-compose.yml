@@ -32,8 +32,8 @@ services:
     image: dpage/pgadmin4
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: usuario@prueba.com
-      PGADMIN_DEFAULT_PASSWORD: contrasenia
+      PGADMIN_DEFAULT_EMAIL: user@test.com
+      PGADMIN_DEFAULT_PASSWORD: password
     ports:
       - "8080:80"
       
